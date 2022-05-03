@@ -24,6 +24,8 @@ int main(int argc, char const *argv[]) {
     cout << "Processo selecionado: " << PID << endl;
     cout << "Sinal selecionado: " << signal << endl;
 
+    // Função kill recebe o número do processo e o código do sinal
+    // 0 verifica se o processo existe
     int process_exists = kill(PID, 0);
 
     if (process_exists != 0) {
