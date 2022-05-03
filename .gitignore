@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+TP1/signals/receiver.o
+TP1/signals/receiver.out
+TP1/signals/sender.o
+TP1/signals/sender.out
