@@ -43,7 +43,6 @@ int main () {
 
     cin >> wait_type;
 
-    // register signal SIGINT and signal handler  
     signal(SIGFPE, signalHandler);  
     signal(SIGALRM, signalHandler);
     signal(SIGTRAP, signalHandler);
