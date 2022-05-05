@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <math.h>
+#include <sys/wait.h>
 
 using namespace std;
 
@@ -20,24 +21,35 @@ bool isPrime(int num){
   return true;
 }
 
-void Producer(int PIPE[], int n) {
-  char pipe_msg[BUFFER];
+void Producer(int pipe[], int n) {
   int n0 = 1;
   int pipeNumber = 1;
   
+  char pipeMessage[BUFFER];
+
+  
   while (pipeNumber <= n) {
-    sprintf(pipe_msg, "%d", n0);
-    write(PIPE[1], &pipe_msg, sizeof(char)*BUFFER);
+    sprintf(pipeMessage, "%d", n0);
+
+    // Escrevendo os bytes na write end
+    write(pipe[1], &pipeMessage, sizeof(char)*BUFFER);
+
     cout << "PROD." << pipeNumber << " - Produto [" << n0 << "] escrito com sucesso!" << endl;
     n0 += setDelta();
 
     pipeNumber++;
   }
 
-  // Sinalizar que finalizou enviando 0
-  sprintf(pipe_msg, "%d", 0);
-  write(PIPE[1], &pipe_msg, sizeof(char)*BUFFER);
-  cout << endl;
+  // Finalizando ao enviar o valor 0
+  sprintf(pipeMessage, "%d", 0);
+  write(pipe[1], &pipeMessage, sizeof(char)*BUFFER);
+
+  // Finalizando escrita
+  close(pipe[1]);
+
+  // Aguardando o Processo filho para sair
+	wait(NULL);
+	exit(0);   
 }
 
 int main(int argc, char const *argv[]) {
