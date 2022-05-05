@@ -5,43 +5,60 @@
 # include <csignal>
 #include <unistd.h>
 
-
-
 # define PORT 8080
 # define SIZE 255
 
 using namespace std;
 
 void signalHandler( int signum ) {
-   cout << "Interrupt signal (" << signum << ") received.\n";
 
-   // cleanup and close up stuff here  
-   // terminate program  
 
-   exit(signum);  
+    switch (signum) {
+    case SIGFPE:
+      cout << "O sinal SIGFPE foi recebido com sucesso!" << endl;
+      break;
+    case SIGALRM:
+      cout << "O sinal SIGALRM foi recebido com sucesso!" << endl;
+      break;
+    case SIGTRAP:
+      cout << "O sinal SIGTRAP foi recebido com sucesso!" << endl;
+      break;
+    default:
+        cout << "O sinal recebido não foi identificado. Tente Novamente" << endl;
+    }
+
+    // Termina o processo
+    cout << "Interrompendo sinal (" << signum << ") recebido.\n";
+
+    exit(signum);  
 }
 
 int main () {
 
     int wait_type;
 
-   // register signal SIGINT and signal handler  
-   signal(SIGINT, signalHandler);  
+    cout << "Informe o número da operação:" << endl;
+    cout << "0 - Busy Wait" << endl;
+    cout << "1 - Blocking Wait" << endl;
 
-   cout << "Informe o numero da operação" << endl;
-   cout << "0 - Busy Wait" << endl;
-   cout << "1 - Blocking Wait" << endl;
+    cin >> wait_type;
 
-   cin >> wait_type;
+    // register signal SIGINT and signal handler  
+    signal(SIGFPE, signalHandler);  
+    signal(SIGALRM, signalHandler);
+    signal(SIGTRAP, signalHandler);
 
 
     if (wait_type == 0) {
-        while (1) { // busy wait
+        while (true) { // busy wait
             cout << "Aguardando sinal..." << endl;
             sleep(1);
         } 
     } else if  (wait_type == 1) {
-        while(1) { pause(); } // blocking wait
+        while(true) { // blocking wait
+            cout << "Aguardando sinal..." << endl;
+            pause();
+        }
     } else {
         cout << "Operação inválida" << endl;
     }

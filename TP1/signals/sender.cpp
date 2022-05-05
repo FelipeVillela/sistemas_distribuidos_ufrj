@@ -14,15 +14,17 @@ int main(int argc, char const *argv[]) {
     // Server sends a signal to the client
 
     if (argc < 3) {
-        cout << "Por favor, informe o núemro do processo e o sinal" << endl;
+        cout << "Por favor, informe o número do processo e o sinal" << endl;
         exit(1);
     }
     
-    int PID = atoi(argv[1]);
-    int signal = atoi(argv[2]);
+    int PID = stoi(argv[1]);
+    int signal = stoi(argv[2]);
+    
+    string signalName = (signal == 5)? "SIGTRAP" : (signal == 14)? "SIGALRM" : "SIGFPE";
 
     cout << "Processo selecionado: " << PID << endl;
-    cout << "Sinal selecionado: " << signal << endl;
+    cout << "Sinal selecionado: " << signal << " (" << signalName << ")" << endl;
 
     // Função kill recebe o número do processo e o código do sinal
     // 0 verifica se o processo existe
