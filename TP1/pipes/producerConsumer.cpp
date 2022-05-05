@@ -13,6 +13,9 @@ int setDelta() {
 }
 
 bool isPrime(int num){
+  if (num == 1) {
+    return false;
+  }
   for (int i=2; i <= num/2; i++) {
     if (num%i == 0) {
       return false;
@@ -26,17 +29,19 @@ void Producer(int pipe[], int n) {
   int pipeNumber = 1;
   
   char pipeMessage[BUFFER];
-
   
   while (pipeNumber <= n) {
+    
+    // Gerando Ni com delta aleatório
+    n0 += setDelta();
+
     sprintf(pipeMessage, "%d", n0);
 
     // Escrevendo os bytes na write end
     write(pipe[1], &pipeMessage, sizeof(char)*BUFFER);
 
-    cout << "PROD." << pipeNumber << " - Produto [" << n0 << "] escrito com sucesso!" << endl;
-    n0 += setDelta();
-
+    cout << "PROD. " << pipeNumber << " - Produto [" << n0 << "] escrito com sucesso!" << endl;
+ 
     pipeNumber++;
   }
 
@@ -50,6 +55,30 @@ void Producer(int pipe[], int n) {
   // Aguardando o Processo filho para sair
 	wait(NULL);
 	exit(0);   
+
+  cout << "Processo finalizado" << endl;
+}
+
+void Consumer(int pipe[]) {
+  char pipeMessage[BUFFER];
+  int receivedData;
+  int counter = 1;
+
+  while (true) {
+    // Leitura dos dados que vêm pelo pipe
+    read(pipe[0], &pipeMessage, sizeof(char)*BUFFER);
+    receivedData = atoi(pipeMessage);
+
+    if(receivedData == 0){
+      return;
+    } else if (isPrime(receivedData)){
+      cout << "CONS. " << counter << "- " << receivedData << " é primo." << endl;
+    } else {
+      cout << "CONS. " << counter << "- " << receivedData << " não é primo." << endl;
+    }
+
+    counter++;
+  }
 }
 
 int main(int argc, char const *argv[]) {
@@ -64,10 +93,19 @@ int main(int argc, char const *argv[]) {
   // usa o clock interno do computador para controlar a escolha do seed continuamente.
   srand(time(NULL)); 
 
-  int PIPE[2];
+  int pi[2];
 
-  // Processo pai
-  Producer(PIPE,number);
+  // Se a função pipe() obtiver sucesso, retornará 0
+  if (pipe(pi) != 0) {
+    cout << "Erro na criação do pipe. Tente novamente." << endl;
+    exit(EXIT_FAILURE);
+  }
+
+  // Fazendo um "fork" do processo
+  pid_t child= fork();
+
+
+  child == 0 ? Consumer(pi) : Producer(pi,number);
 
   return 0;
 }
