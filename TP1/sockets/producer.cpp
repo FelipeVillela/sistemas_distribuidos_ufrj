@@ -6,6 +6,7 @@
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <math.h>
 
 # define PORT 8080
 # define SIZE 255

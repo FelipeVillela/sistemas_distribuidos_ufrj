@@ -56,7 +56,7 @@ int main() {
 
         while(true) {
             char buffer[SIZE];
-            int qt_nums, valread, valwrite;
+            int num, valread, valwrite;
             int is_prime;
 
             bzero(buffer, sizeof(buffer));
@@ -67,19 +67,19 @@ int main() {
                 exit(EXIT_FAILURE);
             }
 
-            qt_nums = atoi(buffer);
-            cout << "Quantidade de números: " << qt_nums << endl;
-            if(qt_nums == 0) {
+            num = atoi(buffer);
+            cout << "Número lido: " << num << endl;
+            if(num == 0) {
                 break;
             }
             else {
 
-                for(int i = 2; i < qt_nums; i++) { 
-                    if (qt_nums % i == 0) {
+                for(int i = 2; i < num; i++) { 
+                    if (num % i == 0 || num == 1) {
                         is_prime=0;
                         break;
                     }
-                    else if (i == qt_nums - 1)
+                    else if (i == num - 1)
                         is_prime=1;
                     
                 }
