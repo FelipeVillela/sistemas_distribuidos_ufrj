@@ -74,15 +74,7 @@ int main() {
             }
             else {
 
-                for(int i = 2; i < num; i++) { 
-                    if (num % i == 0 || num == 1) {
-                        is_prime=0;
-                        break;
-                    }
-                    else if (i == num - 1)
-                        is_prime=1;
-                    
-                }
+                is_prime = isPrime(num);
                     
                 // cout << buffer << is_prime << endl;
                 sprintf (buffer, "%d", is_prime);
