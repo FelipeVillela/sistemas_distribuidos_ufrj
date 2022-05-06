@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
             
             bzero(buffer, sizeof(buffer));
 
-            random_number = getRandomNumber();
+            random_number += getRandomNumber();
             // cout << "Número: " << random_number << endl;
 
             if (qt_nums <= 0) {
