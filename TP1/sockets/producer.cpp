@@ -72,8 +72,6 @@ int main(int argc, char *argv[]) {
         cout << "Conexão aceita" << endl;
 
 
-        // int qt_nums = 6;
-        int rw;
         int is_prime;
         int random_number = 1;
        
@@ -82,7 +80,6 @@ int main(int argc, char *argv[]) {
             bzero(buffer, sizeof(buffer));
 
             random_number += getRandomNumber();
-            // cout << "Número: " << random_number << endl;
 
             if (qt_nums <= 0) {
                 cout << "Finalizando conexão" << endl;
