@@ -15,7 +15,8 @@ using namespace std;
 
 
 int getRandomNumber() {
-  return rand() % 1000 + 1;
+    srand(time(0));
+    return rand() % 100 + 1;
 }
 
 int main(int argc, char *argv[]) {
