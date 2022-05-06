@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
         perror("Erro ao criar socket");
         exit(EXIT_FAILURE);
     }
-     // Forcefully attaching socket to the port 8080
+     // Coloque o socket em modo de escuta na porta 8080
     if (setsockopt(server_fd, SOL_SOCKET,
                    SO_REUSEADDR | SO_REUSEPORT, &opt,
                    sizeof(opt))) {
@@ -52,7 +52,6 @@ int main(int argc, char *argv[]) {
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
  
-    // Forcefully attaching socket to the port 8080
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
         perror("bind failed");
         exit(EXIT_FAILURE);
@@ -89,7 +88,6 @@ int main(int argc, char *argv[]) {
             }
 
             sprintf (buffer, "%d", random_number);
-            // cout << buffer << random_number << endl;
             
             valwrite = write(new_socket, buffer, sizeof(buffer));
             if (valwrite < 0) {

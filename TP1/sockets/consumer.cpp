@@ -76,7 +76,6 @@ int main() {
 
                 is_prime = isPrime(num);
                     
-                // cout << buffer << is_prime << endl;
                 sprintf (buffer, "%d", is_prime);
                 valwrite = write(sock, buffer, sizeof(buffer));
                 if (valwrite < 0) {
