@@ -15,6 +15,8 @@ import sys
 
 params = sys.argv[1:]
 
+write_lock = threading.Lock()
+
 def main():
     if len(params) < 3:
         print("Parâmetros insuficientes")
@@ -23,7 +25,7 @@ def main():
     HOST = 'localhost' # Endereço IP do servidor
     PORT = 8000 # Porta que o servidor escuta
     F = 1024 # Tamanho de bytes a serem enviados
-    k = int(params[0]) # Segundos de intervalo entre uma requisição e outra
+    k = float(params[0]) # Segundos de intervalo entre uma requisição e outra
     reps = int(params[1]) # Quantidade de requisições de escrita a serem feitas
     test_number = int(params[2]) # Número do teste
 
@@ -40,23 +42,20 @@ def main():
         return "Erro ao conectar ao servidor"
 
 
-    # username = input("Digite seu nome de usuário: ")
     pid = os.getpid()
-    print("Você está conectado ao servidor")
+    # print("Você está conectado ao servidor")
     
-    request_access(client, pid)
+    request_access(client, pid, test_number)
     while True:
-        try:            
+        try:
             message = client.recv(F).decode('utf-8')
 
             if message == '2':
                 print("Acesso concedido")
-
-                _write(client, pid, test_number)
-                
+                _write("[S] Grant", client, pid, test_number)                
         
                 # Solicita a saída da região crítica
-                client.send(f'3|{pid}'.encode('utf-8'))
+                client.send(f'3|{pid}|{test_number}'.encode('utf-8'))
                 reps -= 1
 
                 # Sai do loop após alcançar o número máximo de repetições
@@ -65,7 +64,7 @@ def main():
                 # Dorme k segundos e solicita acesso novamente
                 print(f"Dormindo...{reps}")
                 time.sleep(k)
-                request_access(client, pid)
+                request_access(client, pid, test_number)
                 
         except Exception as e:
             print("Erro ao receber mensagens\n", e)
@@ -78,21 +77,26 @@ def main():
 
 
 
-def _write(client, pid, test_number):
+def _write(operation_type, client, pid, test_number):
     # Captura as mensagens vindas do servidor
     try:
+        while write_lock.locked():
+            time.sleep(0.1)
+        write_lock.acquire()
         with open(f'log_{test_number}.txt', 'a') as f:
             now = dt.datetime.now()
-            f.write(f'{pid} {now}\n')
+            f.write(f'{operation_type} {pid} {now}\n')
+        write_lock.release()
 
 
     except Exception as e:
         print("Erro ao escrever arquivo\n", e)
         client.close()
 
-def request_access(client, pid):
+def request_access(client, pid, test_number):
     try:
         client.send(f'1|{pid}'.encode('utf-8'))
+        _write("[R] Request", client, pid, test_number)
     except:
         return "Erro ao enviar mensagens"
 

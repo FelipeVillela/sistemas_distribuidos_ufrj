@@ -1,6 +1,8 @@
 import socket
 import threading
 from queue import Queue
+import datetime as dt
+import time
 
 constants = {
     'HOST': 'localhost', # Endereço IP do servidor
@@ -14,7 +16,7 @@ constants = {
 clients = []
 
 lock = threading.Lock()
-
+write_lock = threading.Lock()
 
 def main():
 
@@ -53,28 +55,25 @@ def coordinate_access(client):
             if message[0] == '1':
                 print(f"Processo {message[1]} solicitou acesso à região crítica")
                 
-                # Adiciona o cliente à fila de clientes
+                # Adiciona o cliente à fila de clientes                
                 clients.append(client)
 
                 if lock.locked():
                     client.send('Aguarde...'.encode('utf-8'))                    
                     
                 else:
-                    # lock.acquire()
-                    # print("Acesso concedido")
-                    # clients[0].send('2'.encode('utf-8'))
+                    print(f"Acesso concedido ao processo {message[1]}")
                     _grant_access(client)
 
 
 
             elif message[0] == '3':
                 print(f"Processo {message[1]} saiu da região crítica")
+                _write("[R] Release", client, message[1], message[2])
+                clients.remove(client)
                 lock.release()
-
-                clients.pop(0)
+                
                 if len(clients) > 0:
-                    # lock.acquire()
-                    # clients[0].send('2'.encode('utf-8'))
                     _grant_access(clients[0])
 
 
@@ -94,17 +93,21 @@ def _grant_access(client):
         clients.remove(client)
         lock.release()
 
-def broadcast(message, client):
-    # Recebe a mensagem do cliente e repassa a todos os outros
-    for c in clients:
-        if c != client:
-            try:
-                c.send(message.encode('utf-8'))
-            except:
-                print("Erro ao enviar mensagens")
-                # c.close()
-                clients.remove(c)
+def _write(operation_type, client, pid, test_number):
+    # Captura as mensagens vindas do servidor
+    try:
+        while write_lock.locked():
+            time.sleep(0.1)
+        write_lock.acquire()
+        with open(f'log_{test_number}.txt', 'a') as f:
+            now = dt.datetime.now()
+            f.write(f'{operation_type} {pid} {now}\n')
+        write_lock.release()
 
+
+    except Exception as e:
+        print("Erro ao escrever arquivo\n", e)
+        client.close()
 
 
 if __name__ == '__main__':

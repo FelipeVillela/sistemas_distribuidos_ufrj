@@ -10,6 +10,7 @@ if len(params) < 1:
 
 
 def validate(index):
+    print(index)
     f = open(f"log_{index}.txt", "r")
     lines = f.readlines()
     requests = []
