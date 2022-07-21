@@ -1,5 +1,16 @@
-def validate():
-    f = open("log.txt", "r")
+import sys
+
+params = sys.argv[1:]
+
+if len(params) < 1:
+    print("Informa a quantidade de logs a serem testados")
+    sys.exit(1)
+
+
+
+
+def validate(index):
+    f = open(f"log_{index}.txt", "r")
     lines = f.readlines()
     requests = []
     grants = []
@@ -30,4 +41,6 @@ def validate():
     print("Log file was successfully validated")
 
 if __name__ == "__main__":
-    validate()
+    print(params)
+    for i in range(int(params[0])):
+        validate(i)
