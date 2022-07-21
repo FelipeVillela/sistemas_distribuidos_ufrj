@@ -16,16 +16,21 @@ import sys
 params = sys.argv[1:]
 
 def main():
+    if len(params) < 3:
+        print("Parâmetros insuficientes")
+        sys.exit(1)
+    
     HOST = 'localhost' # Endereço IP do servidor
     PORT = 8000 # Porta que o servidor escuta
     F = 1024 # Tamanho de bytes a serem enviados
     k = int(params[0]) # Segundos de intervalo entre uma requisição e outra
     reps = int(params[1]) # Quantidade de requisições de escrita a serem feitas
-    
+    test_number = int(params[2]) # Número do teste
+
     print(f'k: {k}')
     print(f'reps: {reps}')
 
-    # Cria um socket TCP
+    # Cria um socket TCP (SOCK_STREAM) IPv4 (AF_INET)
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
@@ -47,7 +52,7 @@ def main():
             if message == '2':
                 print("Acesso concedido")
 
-                _write(client, pid)
+                _write(client, pid, test_number)
                 
         
                 # Solicita a saída da região crítica
@@ -73,10 +78,10 @@ def main():
 
 
 
-def _write(client, pid):
+def _write(client, pid, test_number):
     # Captura as mensagens vindas do servidor
     try:
-        with open('log.txt', 'a') as f:
+        with open(f'log_{test_number}.txt', 'a') as f:
             now = dt.datetime.now()
             f.write(f'{pid} {now}\n')
 
@@ -93,4 +98,5 @@ def request_access(client, pid):
 
 
 
-main()
+if __name__ == '__main__':
+    main()

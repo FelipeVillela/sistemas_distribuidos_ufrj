@@ -6,7 +6,7 @@ constants = {
     'HOST': 'localhost', # Endereço IP do servidor
     'PORT': 8000, # Porta que o servidor escuta
     'F': 1024, # Tamanho de bytes a serem enviados
-    'N': 10, # Número máximo de conexões aceitas
+    'N': 256, # Número máximo de conexões aceitas
 }
 
 
@@ -105,4 +105,7 @@ def broadcast(message, client):
                 # c.close()
                 clients.remove(c)
 
-main()
+
+
+if __name__ == '__main__':
+    main()
