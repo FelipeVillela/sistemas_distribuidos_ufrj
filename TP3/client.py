@@ -3,6 +3,7 @@ import threading
 import os
 import time
 import datetime as dt
+import sys
 
 
 
@@ -12,12 +13,17 @@ import datetime as dt
 3. RELEASE: Mensagem enviada por um processo ao sair da região crítica.
 """
 
+params = sys.argv[1:]
+
 def main():
     HOST = 'localhost' # Endereço IP do servidor
     PORT = 8000 # Porta que o servidor escuta
     F = 1024 # Tamanho de bytes a serem enviados
-    k = 2 # Segundos definidos para dormir
-    reps = 10 # Numero de repetições
+    k = int(params[0]) # Segundos de intervalo entre uma requisição e outra
+    reps = int(params[1]) # Quantidade de requisições de escrita a serem feitas
+    
+    print(f'k: {k}')
+    print(f'reps: {reps}')
 
     # Cria um socket TCP
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
