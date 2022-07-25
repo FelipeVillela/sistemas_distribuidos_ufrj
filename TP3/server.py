@@ -1,8 +1,7 @@
 import socket
 import threading
 from queue import Queue
-import datetime as dt
-import time
+
 
 constants = {
     'HOST': 'localhost', # Endereço IP do servidor
@@ -13,10 +12,10 @@ constants = {
 
 
 # Lista que armazena os clientes conectados
-clients = []
+clients = Queue()
 
-lock = threading.Lock()
-write_lock = threading.Lock()
+lock = threading.Lock() # Lock que controla o acesso à região crítica
+
 
 def main():
 
@@ -36,79 +35,72 @@ def main():
         return
 
     while True:
-        client, address = server.accept()
+        client = server.accept()
 
         # Cria uma thread que irá coordenar o acesso à região crítica
-        thread_coordinator = threading.Thread(target=coordinate_access, args=(client,))
+        thread_coordinator = threading.Thread(target=_coordinate_access, args=(client,))
 
         thread_coordinator.start()
 
 
 
 
-def coordinate_access(client):
+def _coordinate_access(client):
     # Captura e coordena solicitações de acesso a região crítica
     while True:
         try:
             message = client.recv(constants['F']).decode('utf-8').split('|')
+            
+            if len(message) < 3:
+                print("Encerrando conexão")
+                client.close()
+                return
+            
+            pid = message[1]
 
             if message[0] == '1':
-                print(f"Processo {message[1]} solicitou acesso à região crítica")
-                
-                # Adiciona o cliente à fila de clientes                
-                clients.append(client)
+                print(f"Processo {pid} solicitou acesso à região crítica")
+                              
+                clients.put((client, pid))
 
                 if lock.locked():
                     client.send('Aguarde...'.encode('utf-8'))                    
                     
-                else:
-                    print(f"Acesso concedido ao processo {message[1]}")
-                    _grant_access(client)
+                else: 
+                    next_client = clients.get()
+
+                    _grant_access(next_client[0], next_client[1])
 
 
 
             elif message[0] == '3':
-                print(f"Processo {message[1]} saiu da região crítica")
-                _write("[R] Release", client, message[1], message[2])
-                clients.remove(client)
+                print(f"Processo {pid} saiu da região crítica")
                 lock.release()
-                
-                if len(clients) > 0:
-                    _grant_access(clients[0])
+
+                if not clients.empty():
+                    next_client = clients.get(0)
+
+                    _grant_access(next_client[0], next_client[1])
+
+            elif message[0] == '4':
+                print(f"Processo {pid} - {message[2]}")
 
 
         except Exception as e:
-            print("Erro ao receber mensagens", str(e))
+            print(f"Erro ao receber mensagens: {str(e)}")
             client.close()
             break
 
 
-def _grant_access(client):
+def _grant_access(client, pid):
     try:
         lock.acquire()
         client.send('2'.encode('utf-8'))
+        print(f"Acesso concedido ao processo {pid}")
     except Exception as e:
-        print("Erro: ", str(e))
+        print("Erro grant: ", str(e))
         client.close()
-        clients.remove(client)
-        lock.release()
-
-def _write(operation_type, client, pid, test_number):
-    # Captura as mensagens vindas do servidor
-    try:
-        while write_lock.locked():
-            time.sleep(0.1)
-        write_lock.acquire()
-        with open(f'log_{test_number}.txt', 'a') as f:
-            now = dt.datetime.now()
-            f.write(f'{operation_type} {pid} {now}\n')
-        write_lock.release()
-
-
-    except Exception as e:
-        print("Erro ao escrever arquivo\n", e)
-        client.close()
-
+        lock.release()    
 
 if __name__ == '__main__':
     main()
